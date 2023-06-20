@@ -76,12 +76,15 @@ def load_pdf(class_name, properties=None):
     print(properties)
     try:
         url = properties["url"]
-
+        print("loading pdf: " + url + "...")
         # load file from a given url
         response = requests.get(url)
+        print(response)
         response.raise_for_status()
         pdf_file = io.BytesIO(response.content)
+        print("file loaded")
         pdf_reader = pypdf.PdfReader(pdf_file)
+        print("file read")
         num_pages = len(pdf_reader.pages)
         pages_text = []
         pageCounter = 0
