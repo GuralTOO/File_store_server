@@ -115,7 +115,7 @@ def load_pdf(class_name, properties=None):
 
                 for chunk in text_chunks:
                     modified_properties = properties
-                    modified_properties["page_number"] = pageCounter
+                    modified_properties["page_number"] = str(pageCounter)
                     modified_properties["text"] = chunk
                     add_item(class_name=class_name, item=modified_properties)
 
