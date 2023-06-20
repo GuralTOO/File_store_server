@@ -9,6 +9,7 @@ import io
 import requests
 import datetime
 from utils import utils
+import tempfile
 
 dotenv.load_dotenv()
 client = weaviate.Client(
@@ -82,44 +83,43 @@ def load_pdf(class_name, properties=None):
         response = requests.get(url)
         print(response)
         response.raise_for_status()
-        pdf_file = io.BytesIO(response.content)
-        print("file loaded")
-        pdf_reader = pypdf.PdfReader(pdf_file)
-        print("file read")
-        num_pages = len(pdf_reader.pages)
-        pages_text = []
-        pageCounter = 0
-        print("file has " + str(num_pages) + " pages")
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(response.content)
+        with open(tmp_file.name, "rb") as pdf_file:
 
-        for page in range(num_pages):
-            print("reading page: " + str(pageCounter + 1) + "...")
-            images = convert_from_path(
-                url, first_page=page + 1, last_page=page + 1)
-            # if there are images in the page, use OCR to extract text
-            if images:
-                page_image = images[0]
-                page_text = pytesseract.image_to_string(page_image)
-                pages_text.append(page_text)
-            # if there are no images in the page, use PyPDF2 to extract text
-            else:
-                page_obj = pdf_reader.getPage(page)
-                page_text = page_obj.extractText()
-                pages_text.append(page_text)
+            pdf_reader = pypdf.PdfReader(pdf_file)
+            print("file loaded")
+            num_pages = len(pdf_reader.pages)
+            pages_text = []
+            pageCounter = 0
+            print("file has " + str(num_pages) + " pages")
+            for page in range(num_pages):
+                print("reading page: " + str(pageCounter + 1) + "...")
+                images = convert_from_path(
+                    url, first_page=page + 1, last_page=page + 1)
+                # if there are images in the page, use OCR to extract text
+                if images:
+                    page_image = images[0]
+                    page_text = pytesseract.image_to_string(page_image)
+                    pages_text.append(page_text)
+                # if there are no images in the page, use PyPDF2 to extract text
+                else:
+                    page_obj = pdf_reader.getPage(page)
+                    page_text = page_obj.extractText()
+                    pages_text.append(page_text)
 
-            print("page " + str(pageCounter + 1) + ": " + page_text)
+                print("page " + str(pageCounter + 1) + ": " + page_text)
 
-            # split text into into chunks of 1000 characters when the word ends
-            text_chunks = utils.get_chunks(page_text)
+                # split text into into chunks of 1000 characters when the word ends
+                text_chunks = utils.get_chunks(page_text)
 
-            for chunk in text_chunks:
-                modified_properties = properties
-                modified_properties["page_number"] = pageCounter
-                modified_properties["text"] = chunk
-                add_item(class_name=class_name, item=modified_properties)
+                for chunk in text_chunks:
+                    modified_properties = properties
+                    modified_properties["page_number"] = pageCounter
+                    modified_properties["text"] = chunk
+                    add_item(class_name=class_name, item=modified_properties)
 
-            pageCounter += 1
-
-        pdf_file.close()
+                pageCounter += 1
 
         return "Success"
     except Exception as e:
