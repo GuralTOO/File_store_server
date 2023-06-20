@@ -11,11 +11,19 @@ class_name = "File_store"
 # expects a 'path' 'url' and 'type' in the request body
 @app.route('/upload', methods=['POST'])
 def upload():
-    print("got request: " + str(request.args) + "\n")
-    document_type = request.args.get('type')
-    path = request.args.get('path')
-    url = request.args.get('url')
-    print("type: " + str(document_type) + "\n")
+    print("got request: " + str(request.json) + "\n")
+    document_type = request.json.get('type')
+    path = request.json.get('path')
+    url = request.json.get('url')
+    print(path, document_type)
+    response = {
+        "type": document_type,
+        "path": path,
+        "url": url,
+        "message": "Data received!"
+    }
+
+    return jsonify(response), 200
     # try:
     #     WeaviateClient.load_pdf(class_name=class_name, properties={
     #         "type": document_type, "path": path, "url": url})
@@ -42,4 +50,4 @@ def delete():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
