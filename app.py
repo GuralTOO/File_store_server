@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import requests
 import WeaviateClient
+import OpenAIClient
 import json
 
 
@@ -14,6 +15,7 @@ class_name = "File_store"
 def upload():
     print("got request: " + str(request.json) + "\n")
     document_type = request.json.get('type')
+
     path = request.json.get('path')
     url = request.json.get('url')
 
@@ -29,14 +31,20 @@ def upload():
     }
 
     return jsonify(response), 200
-    # try:
-    #     WeaviateClient.load_pdf(class_name=class_name, properties={
-    #         "type": document_type, "path": path, "url": url})
-    #     return f"Uploaded: Type={document_type}, Path={path}, URL={url}", 200
 
-    # except:
-    #     print("Error loading page")
-    #     return f"Error loading page", 500
+
+@app.route('/search', methods=['POST'])
+def search():
+    print("got request: " + str(request.json) + "\n")
+    query = request.json.get('query')
+    path = request.json.get('path')
+    result = OpenAIClient.get_answer(path=path, query=query)
+    response = {
+        "path": path,
+        "query": query,
+        "message": result
+    }
+    return jsonify(response), 200
 
 
 # expects a json object of properties to search for. Possible properties are: type, path, url, text, and page_number
