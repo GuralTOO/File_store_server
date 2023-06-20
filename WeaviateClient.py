@@ -57,6 +57,7 @@ def delete_class(class_name):
 
 
 def add_item(class_name, item):
+    print("adding item...", item)
     client.data_object.create(class_name=class_name, data_object=item)
 
 
@@ -104,14 +105,17 @@ def load_pdf(class_name, properties=None):
                 page_text = page_obj.extractText()
                 pages_text.append(page_text)
 
+            if(pageCounter == 0):
+                print("page 1: " + page_text)
+
             # split text into into chunks of 1000 characters when the word ends
             text_chunks = utils.get_chunks(page_text)
 
             for chunk in text_chunks:
-                mofified_properties = properties
-                mofified_properties["page_number"] = pageCounter
-                mofified_properties["text"] = chunk
-                add_item(class_name=class_name, item=mofified_properties)
+                modified_properties = properties
+                modified_properties["page_number"] = pageCounter
+                modified_properties["text"] = chunk
+                add_item(class_name=class_name, item=modified_properties)
 
             pageCounter += 1
 
