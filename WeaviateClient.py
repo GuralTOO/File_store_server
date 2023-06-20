@@ -122,8 +122,8 @@ def load_pdf(class_name, properties=None):
         pdf_file.close()
 
         return "Success"
-    except:
-        print("Error loading pdf")
+    except Exception as e:
+        print("Error loading pdf:", e)
         return "Failure"
 
 
