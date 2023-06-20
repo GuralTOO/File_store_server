@@ -72,7 +72,8 @@ def add_item(class_name, item):
 #         print("Error loading page")
 
 
-def load_pdf(class_name, properties=[""]):
+def load_pdf(class_name, properties=None):
+    print(properties)
     try:
         url = properties["url"]
 
