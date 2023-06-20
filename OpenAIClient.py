@@ -11,7 +11,7 @@ def get_answer(query: str, path: str):
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(context)},
                   {"role": "user", "content": "This is my question: " + query}],
-        max_tokens=5000,
+        max_tokens=2000,
         temperature=0.3,
     )
     return response.choices[0].message.content
