@@ -84,6 +84,7 @@ def load_pdf(class_name, properties=[""]):
         num_pages = len(pdf_reader.pages)
         pages_text = []
         pageCounter = 0
+        print("file has " + str(num_pages) + " pages")
 
         for page in range(num_pages):
             images = convert_from_path(
