@@ -86,7 +86,6 @@ def load_pdf(class_name, properties=None):
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(response.content)
         with open(tmp_file.name, "rb") as pdf_file:
-
             pdf_reader = pypdf.PdfReader(pdf_file)
             print("file loaded")
             num_pages = len(pdf_reader.pages)
@@ -95,8 +94,9 @@ def load_pdf(class_name, properties=None):
             print("file has " + str(num_pages) + " pages")
             for page in range(num_pages):
                 print("reading page: " + str(pageCounter + 1) + "...")
+                local_path = os.path.abspath(tmp_file.name)
                 images = convert_from_path(
-                    url, first_page=page + 1, last_page=page + 1)
+                    local_path, first_page=page + 1, last_page=page + 1)
                 # if there are images in the page, use OCR to extract text
                 if images:
                     page_image = images[0]
