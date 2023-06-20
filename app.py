@@ -1,7 +1,8 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import requests
 import WeaviateClient
 import json
+
 
 app = Flask(__name__)
 
@@ -15,12 +16,16 @@ def upload():
     document_type = request.json.get('type')
     path = request.json.get('path')
     url = request.json.get('url')
-    print(path, document_type)
+
+    # make the weaviate call
+    result = WeaviateClient.load_pdf(class_name=class_name, properties={
+        "type": document_type, "path": path, "url": url})
+    print(result)
     response = {
         "type": document_type,
         "path": path,
         "url": url,
-        "message": "Data received!"
+        "message": result
     }
 
     return jsonify(response), 200
