@@ -92,6 +92,7 @@ def load_pdf(class_name, properties=None):
         print("file has " + str(num_pages) + " pages")
 
         for page in range(num_pages):
+            print("reading page: " + pageCounter + 1 + "...")
             images = convert_from_path(
                 url, first_page=page + 1, last_page=page + 1)
             # if there are images in the page, use OCR to extract text
@@ -105,8 +106,7 @@ def load_pdf(class_name, properties=None):
                 page_text = page_obj.extractText()
                 pages_text.append(page_text)
 
-            if(pageCounter == 0):
-                print("page 1: " + page_text)
+            print("page " + pageCounter + 1 + ": " + page_text)
 
             # split text into into chunks of 1000 characters when the word ends
             text_chunks = utils.get_chunks(page_text)
