@@ -152,7 +152,11 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
                .do()
                )
     print("search results: ", results)
-    return results["data"]["Get"][class_name][properties[0]]
+    # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
+    search_result = ""
+    for i in range(len(results["data"]["Get"][class_name])):
+        search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
+    return search_result
 
 # return all items in a class
 
