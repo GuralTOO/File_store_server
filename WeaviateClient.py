@@ -152,7 +152,7 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
                .do()
                )
     print("search results: ", results)
-    return results
+    return results["data"]["Get"][class_name][properties[0]]
 
 # return all items in a class
 
