@@ -6,7 +6,7 @@ class_name = "File_store"
 
 def get_answer(query: str, path: str):
     context = WeaviateClient.search_items(class_name=class_name, properties=[
-        "text"], text_query=query, k=5)
+        "text"], text_query=query, k=5, path=path)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(context)},
