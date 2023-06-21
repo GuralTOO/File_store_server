@@ -144,8 +144,13 @@ def delete_items(class_name, properties=[]):
 # search for items in a class using nearest neighbor search
 def search_items(class_name, properties=[""], text_query="", k=10, path=""):
     properties.append("path")
-    results = client.query.get(class_name=class_name, properties=properties).with_where({"path": "path", "operator": "beginsWith", "valueString": path}).with_near_text(
-        {"concepts": text_query}).with_limit(k).do()
+    pathFilter = {"path": "path", "operator": "Like", "valueText": path+"*"}
+    results = (client.query.get(class_name=class_name, properties=properties)
+               .with_where(pathFilter)
+               .with_near_text({"concepts": text_query})
+               .with_limit(k)
+               .do()
+               )
     print("search results: ", results)
     return results
 
