@@ -1,13 +1,30 @@
 from flask import Flask, request, jsonify
-import requests
+from flask_socketio import SocketIO, send
 import WeaviateClient
 import OpenAIClient
 import json
 
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
 
 class_name = "File_store"
+
+
+@socketio.on('searchStream')
+def handleSearchStream(data):
+    # extract "path" and "query" from data
+    path = data.get('path')
+    query = data.get('query')
+    print("got request: " + str(data) + "\n")
+    print("path: " + path + "\n")
+    print("query: " + query + "\n")
+    # socketio.emit('searchStream', "hello")
+    result = OpenAIClient.get_answer_stream(question=query, path=path)
+    for part in result:
+        print(part)
+        socketio.emit('searchStream', part)
 
 
 # expects a 'path' 'url' and 'type' in the request body

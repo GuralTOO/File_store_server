@@ -13,8 +13,8 @@ import tempfile
 
 dotenv.load_dotenv()
 client = weaviate.Client(
-    url="http://localhost:8080",
-    # url="http://206.189.199.72:8080/",  # Replace with your endpoint
+    # url="http://localhost:8080",
+    url="http://206.189.199.72:8080/",  # Replace with your endpoint
     additional_headers={
         "X-OpenAI-Api-Key": os.environ["OPENAI_API_KEY"],
     }
