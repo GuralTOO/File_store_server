@@ -32,7 +32,6 @@ def handleSearchStream(data):
 def upload():
     print("got request: " + str(request.json) + "\n")
     document_type = request.json.get('type')
-
     path = request.json.get('path')
     url = request.json.get('url')
 
@@ -68,15 +67,16 @@ def search():
 @app.route('/delete', methods=['POST'])
 def delete():
     # default to empty dictionary if not present
-    properties = json.loads(request.args.get('properties', '{}'))
-    print(properties)
+    path = request.json.get('path')
+    print("Received a delete request for path: " + path + "\n")
+    properties = {"path": path}
     try:
         WeaviateClient.delete_items(
             class_name=class_name, properties=properties)
         return f"Deleted: path={properties['path']}", 200
-    except:
-        print("Error deleting entry")
-        return f"Error deleting entry", 500
+    except Exception as e:
+        print("Error deleting entry" + str(e) + "\n")
+        return f"Error deleting entry" + str(e), 500
 
 
 if __name__ == '__main__':
