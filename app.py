@@ -20,11 +20,10 @@ def handleSearchStream(data):
     print("got request: " + str(data) + "\n")
     print("path: " + path + "\n")
     print("query: " + query + "\n")
-    # socketio.emit('searchStream', "hello")
     result = OpenAIClient.get_answer_stream(question=query, path=path)
     for part in result:
         print(part)
-        socketio.emit('searchStream', part)
+        send('searchStream', part)
 
 
 # expects a 'path' 'url' and 'type' in the request body
