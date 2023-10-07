@@ -23,7 +23,7 @@ def handleSearchStream(data):
     result = OpenAIClient.get_answer_stream(question=query, path=path)
     for part in result:
         print(part)
-        send('searchStream', part)
+        send(part)
 
 
 # expects a 'path' 'url' and 'type' in the request body
