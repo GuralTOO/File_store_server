@@ -20,6 +20,11 @@ client = weaviate.Client(
     }
 )
 
+
+def get_client():
+    return client
+
+
 classes = client.schema.get().get("classes")
 print(classes)
 
@@ -85,6 +90,10 @@ def load_pdf(class_name, properties=None):
         response.raise_for_status()
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(response.content)
+
+        # enable batching
+        client.batch.configure(batch_size=100)
+
         with open(tmp_file.name, "rb") as pdf_file:
             pdf_reader = pypdf.PdfReader(pdf_file)
             print("file loaded")
@@ -117,7 +126,12 @@ def load_pdf(class_name, properties=None):
                     modified_properties = properties
                     modified_properties["page_number"] = str(pageCounter)
                     modified_properties["text"] = chunk
-                    add_item(class_name=class_name, item=modified_properties)
+
+                    # add to batches
+                    client.batch.add_data_object(
+                        data_object=modified_properties, class_name=class_name)
+
+                    # add_item(class_name=class_name, item=modified_properties)
 
                 pageCounter += 1
 

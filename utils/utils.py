@@ -11,3 +11,5 @@ def get_chunks(text):
         text_chunks.append(temp_string)
         temp_string = ""
     return text_chunks
+
+

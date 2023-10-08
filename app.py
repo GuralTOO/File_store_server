@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, send
 import WeaviateClient
 import OpenAIClient
 import json
-
+import upload
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
@@ -34,10 +34,18 @@ def upload():
     path = request.json.get('path')
     url = request.json.get('url')
 
+    # if the request has a "contentType", then get it, if not, set it to ""
+    contentType = request.json.get('contentType', "")
+
     # make the weaviate call
-    result = WeaviateClient.load_pdf(class_name=class_name, properties={
-        "type": document_type, "path": path, "url": url})
-    print(result)
+    # result = WeaviateClient.load_pdf(class_name=class_name, properties={
+    #     "type": document_type, "path": path, "url": url})
+
+    # if the contentType is "research" then we want to extract the following information from the file:
+    # authors, key results, and methods
+    result = upload(class_name=class_name, document_type=document_type,
+                    path=path, url=url, contentType=contentType)
+
     response = {
         "type": document_type,
         "path": path,
