@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, send
 import WeaviateClient
 import OpenAIClient
 import json
-import upload
+from upload import upload_file
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
@@ -43,8 +43,8 @@ def upload():
 
     # if the contentType is "research" then we want to extract the following information from the file:
     # authors, key results, and methods
-    result = upload(document_type=document_type,
-                    path=path, url=url, contentType=contentType)
+    result = upload_file(document_type=document_type,
+                         path=path, url=url, contentType=contentType)
 
     response = {
         "type": document_type,
