@@ -125,10 +125,13 @@ def upload_file(document_type, path, url, contentType):
     result = WeaviateClient.load_pdf(class_name=class_name, properties={
                                      "type": document_type, "path": path, "url": url})
 
-    if(contentType != "research"):
+    # if contentType is not "research" then we don't need to extract the authors, methods, and key results
+    if contentType != "research":
         return result
 
-    return analyze_research(path=path)
+    analysis = analyze_research(path=path)
+    print(analysis)
+    return analysis
 
 
 # create functions to test the context retrieving functions
@@ -138,4 +141,4 @@ testing_path = "c75767dd-172c-463c-aafc-1e2dfddc1b32/yolo/SSRN-id4453685.pdf"
 # get_context_for_methods(properties=["text"], k=3, path="")
 # get_context_for_key_results(properties=["text"], k=3, path="")
 
-print(analyze_research(path=testing_path))
+# print(analyze_research(path=testing_path))
