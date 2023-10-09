@@ -43,7 +43,7 @@ def upload():
 
     # if the contentType is "research" then we want to extract the following information from the file:
     # authors, key results, and methods
-    result = upload(class_name=class_name, document_type=document_type,
+    result = upload(document_type=document_type,
                     path=path, url=url, contentType=contentType)
 
     response = {
