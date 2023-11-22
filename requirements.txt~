@@ -1,5 +1,0 @@
-flask
-Flask-SocketIO
-weaviate-client==4.*
-python-dotenv
-pypdf
