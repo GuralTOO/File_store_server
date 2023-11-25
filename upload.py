@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import openai
 import WeaviateClient
 import os
+import SupabaseClient
 class_name = "File_store"
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -27,25 +28,15 @@ def get_context_for_authors(properties=[""], k=3, path=""):
         .do()
     )
 
-    # results = (
-    #     client.query
-    #     .get(class_name=class_name, properties=properties)
-    #     .with_where(pathFilter)
-    #     .with_near_text({"concepts": text_query})
-    #     .with_limit(k)
-    #     .do()
-    # )
-
-    # print("search results: ", results)
     search_result = ""
     for i in range(len(results["data"]["Get"][class_name])):
         search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
 
-    # change this to
     return search_result
 
 
 def get_context_for_methods(properties=[""], k=3, path=""):
+ 
     properties.append("path")
     pathFilter = {"path": "path", "operator": "Like", "valueText": path+"*"}
     client = WeaviateClient.get_client()
@@ -58,7 +49,7 @@ def get_context_for_methods(properties=[""], k=3, path=""):
         .with_limit(k)
         .do()
     )
-    # print("search results: ", results)
+
     search_result = ""
     for i in range(len(results["data"]["Get"][class_name])):
         search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
@@ -79,7 +70,7 @@ def get_context_for_key_results(properties=[""], k=3, path=""):
         .with_limit(k)
         .do()
     )
-    # print("search results: ", results)
+
     search_result = ""
     for i in range(len(results["data"]["Get"][class_name])):
         search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
@@ -113,7 +104,6 @@ def analyze_research(path=""):
             methods = response["choices"][0]["text"]
         elif i == 2:
             key_results = response["choices"][0]["text"]
-        print(response["choices"][0]["text"])
 
     # make a json object with the following properties: authors, methods, key_results
     # return the json object
@@ -125,14 +115,20 @@ def upload_file(document_type, path, url, contentType):
     result = WeaviateClient.load_pdf(class_name=class_name, properties={
                                      "type": document_type, "path": path, "url": url})
 
+
+    print("uploaded file with path: ", path, " and content type: ", contentType)
     # if contentType is not "research" then we don't need to extract the authors, methods, and key results
-    # if contentType != "research":
-    #     return result
-    print(contentType)
+    if contentType != "research":
+        return
 
     analysis = analyze_research(path=path)
-    print(analysis)
-    return analysis
+    print("analysis: ", analysis)
+    
+    # instead of returning the metadata, save it directly to the db
+    SupabaseClient.update_metadata_in_database(path=path, metadata=analysis)
+    print("updated metadata in database for path: ", path)
+        
+    return
 
 
 # create functions to test the context retrieving functions
@@ -141,5 +137,6 @@ testing_path = "c75767dd-172c-463c-aafc-1e2dfddc1b32/yolo/SSRN-id4453685.pdf"
 # get_context_for_authors(properties=["text"], k=3, path=testing_path)
 # get_context_for_methods(properties=["text"], k=3, path="")
 # get_context_for_key_results(properties=["text"], k=3, path="")
-
+# print(analyze_research(testing_path))
 # print(analyze_research(path=testing_path))
+testing_path_1 = "c75767dd-172c-463c-aafc-1e2dfddc1b32/t1/1/3/short_1706.03762.pdf"

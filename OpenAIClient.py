@@ -33,3 +33,4 @@ def get_answer_stream(question: str, path: str):
         # check if part['choices'][0]['delta'] has 'content' key
         if 'content' in part['choices'][0]['delta']:
             yield part['choices'][0]['delta']['content']
+
