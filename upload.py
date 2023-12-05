@@ -120,11 +120,11 @@ def analyze_research(path=""):
             temperature=0.2, # reduced the temperature
         )
         if i == 0:
-            authors = response["choices"][0]["text"]
+            authors = response.choices[0].text
         elif i == 1:
-            methods = response["choices"][0]["text"]
+            methods = response.choices[0].text
         elif i == 2:
-            key_results = response["choices"][0]["text"]
+            key_results = response.choices[0].text
 
     # make a json object with the following properties: authors, methods, key_results
     # return the json object
