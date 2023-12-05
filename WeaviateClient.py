@@ -131,11 +131,16 @@ def load_pdf(class_name, properties=None):
                     client.batch.add_data_object(
                         data_object=modified_properties, class_name=class_name)
 
+                    
                     print("added page " + str(pageCounter + 1) + ": " + chunk)
+                    
+                    # confirm that the chunk was added
                     
                     # add_item(class_name=class_name, item=modified_properties)
 
                 pageCounter += 1
+            
+            print("client data objects: ", client.batch.data_objects)
 
         return "Success"
     except Exception as e:
