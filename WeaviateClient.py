@@ -63,8 +63,9 @@ def delete_class(class_name):
 
 
 def add_item(class_name, item):
-    print("adding item...", item)
-    client.data_object.create(class_name=class_name, data_object=item)
+    uuid = client.data_object.create(class_name=class_name, data_object=item)
+    print("adding item...", item, uuid)
+
 
 
 # def load_text(class_name, text, url):
@@ -127,9 +128,10 @@ def load_pdf(class_name, properties=None):
                     modified_properties["page_number"] = str(pageCounter)
                     modified_properties["text"] = chunk
 
+                    add_item(class_name=class_name, item=modified_properties)
                     # add to batches
-                    client.batch.add_data_object(
-                        data_object=modified_properties, class_name=class_name)
+                    # client.batch.add_data_object(
+                    #     data_object=modified_properties, class_name=class_name)
 
                     
                     print("added page " + str(pageCounter + 1) + ": " + chunk)
@@ -140,7 +142,6 @@ def load_pdf(class_name, properties=None):
 
                 pageCounter += 1
             
-            print("client data objects: ", client.batch)
 
         return "Success"
     except Exception as e:
