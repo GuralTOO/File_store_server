@@ -131,7 +131,7 @@ def analyze_research(path=""):
     return {"authors": authors, "methods": methods, "key_results": key_results}
 
 
-def upload_file(document_type, path, url, contentType):
+def upload_file(document_type, path, url, contentType="research"):
     # Load the file to Weaviate
     result = WeaviateClient.load_pdf(class_name=class_name, properties={
                                      "type": document_type, "path": path, "url": url})
