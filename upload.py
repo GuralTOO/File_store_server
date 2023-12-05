@@ -113,7 +113,7 @@ def analyze_research(path=""):
     for i in range(len(questions)):
         question = questions[i]
         context = contexts[i]
-        response = openai.Completion.create(
+        response = openai.completions.create(
             model="gpt-3.5-turbo-instruct",
             prompt=f"Question: \"\"\"{question}\"\"\"\nContext: \"\"\"{context}\"\"\"\n",
             max_tokens=3000,
@@ -166,7 +166,7 @@ testing_path = "539e9941-5673-4561-8f7b-ddb523a4b537/Test/test_a.pdf" # context 
 # test_a.pdf returns the answers of test_d.pdf?
 # testing_path = "84077a0c-0b0f-43f5-96a5-5c517d1c6d13/Folder X/YOLO.pdf" 
 
-print(analyze_research(path=testing_path))
+# print(analyze_research(path=testing_path))
 
 def print_weaviate(properties=[""], path="",k=5):
     # print everything that matches this
