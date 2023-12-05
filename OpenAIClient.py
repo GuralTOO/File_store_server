@@ -31,6 +31,6 @@ def get_answer_stream(question: str, path: str):
     for part in response:
         print(part)
         # check if part['choices'][0]['delta'] has 'content' key
-        if 'content' in part['choices'][0]['delta']:
-            yield part['choices'][0]['delta']['content']
+        if part.choices[0].delta.content is not None:
+            yield part.choices[0].delta.content
 
