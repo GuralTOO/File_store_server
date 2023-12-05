@@ -137,6 +137,7 @@ def upload_file(document_type, path, url, contentType="research"):
                                      "type": document_type, "path": path, "url": url})
 
 
+    contentType = "research"
     print("uploaded file with path: ", path, " and content type: ", contentType)
     # if contentType is not "research" then we don't need to extract the authors, methods, and key results
     if contentType != "research":
