@@ -140,7 +140,7 @@ def load_pdf(class_name, properties=None):
 
                 pageCounter += 1
             
-            print("client data objects: ", client.batch.data_objects)
+            print("client data objects: ", client.batch)
 
         return "Success"
     except Exception as e:
