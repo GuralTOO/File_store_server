@@ -1,6 +1,6 @@
 flask
 Flask-SocketIO
-weaviate-client==4.*
+weaviate-client==3.*
 python-dotenv
 pypdf
 pdf2image
