@@ -104,9 +104,9 @@ def analyze_research(path=""):
         properties=["text"], k=3, path=path), get_context_for_key_results(properties=["text"], k=3, path=path)]
     
     
-    # print("CONTEXT (Authors): ", contexts[0])
-    # print("CONTEXT (Methods): ", contexts[1])
-    # print("CONTEXT (Results): ", contexts[2])
+    print("CONTEXT (Authors): ", contexts[0])
+    print("CONTEXT (Methods): ", contexts[1])
+    print("CONTEXT (Results): ", contexts[2])
 
     OPENA_AI_MODEL = "gpt-3.5-turbo-instruct"
 
@@ -163,7 +163,8 @@ def upload_file(document_type, path, url, contentType="research"):
 # print(analyze_research(path=testing_path))
 # testing_path_1 = "c75767dd-172c-463c-aafc-1e2dfddc1b32/t1/1/3/short_1706.03762.pdf"
 
-testing_path = "539e9941-5673-4561-8f7b-ddb523a4b537/Test/test_a.pdf" # context is empty for some papers (test_c.pdf)- why?
+# testing_path = "539e9941-5673-4561-8f7b-ddb523a4b537/Test/test_a.pdf" # context is empty for some papers (test_c.pdf)- why?
+testing_path = "c75767dd-172c-463c-aafc-1e2dfddc1b32/Entrepclass/testing_1/inside_testing_1/short_1706.03762.pdf"
 # test_a.pdf returns the answers of test_d.pdf?
 # testing_path = "84077a0c-0b0f-43f5-96a5-5c517d1c6d13/Folder X/YOLO.pdf" 
 
@@ -190,4 +191,4 @@ def print_weaviate(properties=[""], path="",k=5):
     return search_result
 
 
-# print(print_weaviate(properties=["text"], path=testing_path))
+print(print_weaviate(properties=["text"], path=testing_path))

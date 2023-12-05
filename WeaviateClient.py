@@ -131,6 +131,8 @@ def load_pdf(class_name, properties=None):
                     client.batch.add_data_object(
                         data_object=modified_properties, class_name=class_name)
 
+                    print("added page " + str(pageCounter + 1) + ": " + chunk)
+                    
                     # add_item(class_name=class_name, item=modified_properties)
 
                 pageCounter += 1
