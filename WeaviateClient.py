@@ -10,6 +10,7 @@ import requests
 import datetime
 from utils import utils
 import tempfile
+import time
 
 dotenv.load_dotenv()
 client = weaviate.Client(
@@ -26,7 +27,7 @@ def get_client():
 
 
 classes = client.schema.get().get("classes")
-print(classes)
+# print(classes)
 
 # region class utilities
 
@@ -68,20 +69,12 @@ def add_item(class_name, item):
 
 
 
-# def load_text(class_name, text, url):
-#     try:
-#         # split text into into chunks of 1000 characters
-#         text_chunks = [text[i:i + 1000] for i in range(0, len(text), 1000)]
-#         print("loading page: "+url+"...")
-#         for chunk in text_chunks:
-#             add_item(class_name=class_name, item={
-#                      "page_text": chunk, "url": url})
-#     except:
-#         print("Error loading page")
 
+import concurrent.futures
 
 def load_pdf(class_name, properties=None):
     print(properties)
+    start_time = time.time() 
     try:
         url = properties["url"]
         print("loading pdf: " + url + "...")
@@ -102,8 +95,9 @@ def load_pdf(class_name, properties=None):
             pages_text = []
             pageCounter = 0
             print("file has " + str(num_pages) + " pages")
-            for page in range(num_pages):
-                print("reading page: " + str(pageCounter + 1) + "...")
+
+            def process_page(page):
+                print("reading page: " + str(page + 1) + "...")
                 local_path = os.path.abspath(tmp_file.name)
                 images = convert_from_path(
                     local_path, first_page=page + 1, last_page=page + 1)
@@ -118,49 +112,55 @@ def load_pdf(class_name, properties=None):
                     page_text = page_obj.extractText()
                     pages_text.append(page_text)
 
-                print("page " + str(pageCounter + 1) + ": " + page_text)
+                print("page " + str(page + 1) + ": " + page_text)
 
                 # split text into into chunks of 1000 characters when the word ends
                 text_chunks = utils.get_chunks(page_text)
 
                 for chunk in text_chunks:
-                    modified_properties = properties
-                    modified_properties["page_number"] = str(pageCounter)
+                    modified_properties = properties.copy()
+                    modified_properties["page_number"] = str(page)
                     modified_properties["text"] = chunk
 
                     add_item(class_name=class_name, item=modified_properties)
+
                     # add to batches
                     # client.batch.add_data_object(
                     #     data_object=modified_properties, class_name=class_name)
+                    
 
-                    
-                    print("added page " + str(pageCounter + 1) + ": " + chunk)
-                    
-                    # confirm that the chunk was added
-                    
-                    # add_item(class_name=class_name, item=modified_properties)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.map(process_page, range(num_pages))
 
-                pageCounter += 1
+            pageCounter += num_pages
             
-
+        # end timer
+        end_time = time.time()
+        print("time elapsed: " + str(end_time - start_time))
         return "Success"
     except Exception as e:
         print("Error loading pdf:", e)
         return "Failure"
 
 
-def delete_items(class_name, properties=[]):
+
+# Delete document takes in a classname and a path and deletes all items with that path
+def delete_items(className, path):
+    client.batch.consistency_level = weaviate.data.replication.ConsistencyLevel.ALL  # default QUORUM
     try:
-        conditions = [{'path': [key], 'operator': 'Equal',
-                       'valueText': value} for key, value in properties]
-        client.batch.delete_objects(
-            class_name=class_name,
+        conditions = {"path": ["path"], "operator": "Equal", "valueText": path}
+        
+        result = client.batch.delete_objects(
+            class_name=className,
             where=conditions,
+            output="verbose",
+            dry_run=False
         )
         return "Success"
-    except:
-        print("Error deleting items")
+    except Exception as e:
+        print("Error deleting items:", e)
         return "Failure"
+    
 
 
 # search for items in a class using nearest neighbor search
@@ -180,16 +180,21 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
         search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
     return search_result
 
-# return all items in a class
 
 
-def get_all_items(class_name, properties=[""]):
-    results = client.query.get(
-        class_name=class_name, properties=properties).do()
-    return results["data"]["Get"][class_name]
+# print(get_class_names())
+def find_specific_item(className, path):
+    conditions = {"path": "path", "operator": "Equal", "valueText": path}
+    results = client.query.get(class_name=className, properties=["text"]).with_where(
+        conditions).do()
+    # print the results in ["data"]["Get"][class_name][i][properties[0]]
+    for i in range(len(results["data"]["Get"][className])):
+        print(results["data"]["Get"][className][i]["text"])
+    print(len(results["data"]["Get"][className]))    
+    return results
 
+find_specific_item(className="File_store", path = "test")
 
-# add_class(class_name="file_store", description="vectorized files",
-#           variables=["type", "path", "url", "text", "page_number"])
-
-print(get_class_names())
+# load_pdf(class_name="file_store", properties={
+#             "type": "research", "path": "test", "url": "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/044dd9f2-929d-4bc6-b5b9-a18869c4d8ae/Self-Supervised%20Poisson-Gaussian%20Denoising.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMDQ0ZGQ5ZjItOTI5ZC00YmM2LWI1YjktYTE4ODY5YzRkOGFlL1NlbGYtU3VwZXJ2aXNlZCBQb2lzc29uLUdhdXNzaWFuIERlbm9pc2luZy5wZGYiLCJpYXQiOjE3MDIyNTY0OTgsImV4cCI6MTcwMjg2MTI5OH0.kdneimFyliV8aZQl80Z6XGTyS0hMOXbLzIhlaS_edv0&t=2023-12-11T01%3A01%3A39.654Z"})
+# delete_items(className="File_store", path = "test")
