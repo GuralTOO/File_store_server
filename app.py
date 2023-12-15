@@ -76,11 +76,10 @@ def delete():
     # default to empty dictionary if not present
     path = request.json.get('path')
     print("Received a delete request for path: " + path + "\n")
-    properties = {"path": path}
     try:
         WeaviateClient.delete_items(
-            class_name=class_name, properties=properties)
-        return f"Deleted: path={properties['path']}", 200
+            className=class_name, path=path)
+        return f"Deleted: path={path}", 200
     except Exception as e:
         print("Error deleting entry" + str(e) + "\n")
         return f"Error deleting entry" + str(e), 500
