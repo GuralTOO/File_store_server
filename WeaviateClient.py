@@ -156,6 +156,7 @@ def delete_items(className, path):
             output="verbose",
             dry_run=False
         )
+        print("result: ", result)
         return "Success"
     except Exception as e:
         print("Error deleting items:", e)

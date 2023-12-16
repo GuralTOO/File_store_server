@@ -77,15 +77,14 @@ def delete():
     # default to empty dictionary if not present
     path = request.json.get('path')
     print("Received a delete request for path: " + path + "\n")
-    return jsonify({"message": f"Got delete for path={path}"}), 200
 
-    # try:
-    #     WeaviateClient.delete_items(
-    #         className=class_name, path=path)
-    #     return jsonify({"message": f"Deleted path={path}"}), 200
-    # except Exception as e:
-    #     print("Error deleting entry" + str(e) + "\n")
-    #     return jsonify({"error": f"Error deleting entry: {e}"}), 500
+    try:
+        WeaviateClient.delete_items(
+            className=class_name, path=path)
+        return jsonify({"message": f"Deleted path={path}"}), 200
+    except Exception as e:
+        print("Error deleting entry" + str(e) + "\n")
+        return jsonify({"error": f"Error deleting entry: {e}"}), 500
 
 
 if __name__ == '__main__':
