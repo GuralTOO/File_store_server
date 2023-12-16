@@ -7,7 +7,7 @@ import json
 from upload import upload_file
 
 app = Flask(__name__)
-CORS(app)  # Apply CORS to your Flask app
+CORS(app, supports_credentials=True)  # Add CORS so that the frontend can access this server
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 class_name = "File_store"
@@ -77,13 +77,15 @@ def delete():
     # default to empty dictionary if not present
     path = request.json.get('path')
     print("Received a delete request for path: " + path + "\n")
+    return jsonify({"message": f"Got delete for path={path}"}), 200
+
     # try:
     #     WeaviateClient.delete_items(
     #         className=class_name, path=path)
-    #     return f"Deleted: path={path}", 200
+    #     return jsonify({"message": f"Deleted path={path}"}), 200
     # except Exception as e:
     #     print("Error deleting entry" + str(e) + "\n")
-    #     return f"Error deleting entry" + str(e), 500
+    #     return jsonify({"error": f"Error deleting entry: {e}"}), 500
 
 
 if __name__ == '__main__':
