@@ -16,7 +16,7 @@ RapidReview is a web application that allows users to perform a literature revie
 
 #### 3. Go to the branch of interest
 
-```git checkout <branch_name>```
+```git checkout <branch_name>``` for a new branch, ```git checkout -b <branch_name>```
 
 #### 4. Create the virtual environment
 
@@ -24,7 +24,7 @@ RapidReview is a web application that allows users to perform a literature revie
 
 #### 5. Activate the virtual environment
 
-```source venv/bin/activate```
+```source venv/bin/activate``` on Linux/ MacOS, ```venv\Scripts\activate``` on Windows
 
 #### 6. Install the dependencies
 
