@@ -96,17 +96,21 @@ def analyze_research(path=""):
                  "Based on the following excerpts from this research paper, return the list of the research methods used in this research paper.",
                  "Based on the following excerpts from this research paper, return the list of the key results presented in this research paper."]
     '''
-    questions = ["Extract the authors of the paper based on the context below. Do not make any assumptions.",
+    questions = [
+                 "Extract the paper's title based on the context below. Do not make any assumptions.",
+                 "Extract the authors of the paper based on the context below. Do not make any assumptions.",
                  "Extract the main methods described in the context below. Do not make any assumptions.",
                  "Extract the key results described in the context below. Do not make any assumptions."] # "extract" works better than "return a list of"
 
-    contexts = [get_context_for_authors(properties=["text"], k=3, path=path), get_context_for_methods(
-        properties=["text"], k=3, path=path), get_context_for_key_results(properties=["text"], k=3, path=path)]
+    context_author = get_context_for_authors(properties=["text"], k=3, path=path)
+    context_method = get_context_for_methods(properties=["text"], k=3, path=path)
+    context_result = get_context_for_key_results(properties=["text"], k=3, path=path)
+    contexts = [context_author, context_author, context_method, context_result]
     
     
-    print("CONTEXT (Authors): ", contexts[0])
-    print("CONTEXT (Methods): ", contexts[1])
-    print("CONTEXT (Results): ", contexts[2])
+    print("CONTEXT (Authors as well as Title): ", contexts[0])
+    print("CONTEXT (Methods): ", contexts[2])
+    print("CONTEXT (Results): ", contexts[3])
 
     OPENA_AI_MODEL = "gpt-3.5-turbo-instruct"
 
@@ -120,15 +124,17 @@ def analyze_research(path=""):
             temperature=0.2, # reduced the temperature
         )
         if i == 0:
-            authors = response.choices[0].text
+            title = response.choices[0].text
         elif i == 1:
-            methods = response.choices[0].text
+            authors = response.choices[0].text
         elif i == 2:
+            methods = response.choices[0].text
+        elif i == 3:
             key_results = response.choices[0].text
 
     # make a json object with the following properties: authors, methods, key_results
     # return the json object
-    return {"authors": authors, "methods": methods, "key_results": key_results}
+    return {"title" : title, "authors": authors, "methods": methods, "key_results": key_results}
 
 
 def upload_file(document_type, path, url, contentType="research"):
@@ -184,6 +190,8 @@ def print_weaviate(properties=[""], path="",k=5):
     )
 
     search_result = ""
+    # print("CLIENT in Upload.py", client)
+    # print("results :::", results)
     for i in range(len(results["data"]["Get"][class_name])):
         for p in properties: 
             search_result += results["data"]["Get"][class_name][i][p] + ".\n"
@@ -191,4 +199,6 @@ def print_weaviate(properties=[""], path="",k=5):
     return search_result
 
 
-print(print_weaviate(properties=["text"], path=testing_path))
+#print(print_weaviate(properties=["text"], path=testing_path))
+# print(print_weaviate(properties=["text"], path="test"))
+print(analyze_research("test"))
