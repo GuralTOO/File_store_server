@@ -174,11 +174,11 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
                .with_limit(k)
                .do()
                )
-    print("search results: ", results)
+    # print("search results: ", results)
     # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
-    search_result = ""
+    search_result = {}
     for i in range(len(results["data"]["Get"][class_name])):
-        search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
+        search_result[results["data"]["Get"][class_name][i][properties[1]]] = results["data"]["Get"][class_name][i][properties[0]] + "."
     return search_result
 
 
@@ -194,7 +194,7 @@ def find_specific_item(className, path):
     print(len(results["data"]["Get"][className]))    
     return results
 
-find_specific_item(className="File_store", path = "test")
+# find_specific_item(className="File_store", path = "test")
 
 # load_pdf(class_name="file_store", properties={
 #             "type": "research", "path": "test", "url": "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/044dd9f2-929d-4bc6-b5b9-a18869c4d8ae/Self-Supervised%20Poisson-Gaussian%20Denoising.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMDQ0ZGQ5ZjItOTI5ZC00YmM2LWI1YjktYTE4ODY5YzRkOGFlL1NlbGYtU3VwZXJ2aXNlZCBQb2lzc29uLUdhdXNzaWFuIERlbm9pc2luZy5wZGYiLCJpYXQiOjE3MDIyNTY0OTgsImV4cCI6MTcwMjg2MTI5OH0.kdneimFyliV8aZQl80Z6XGTyS0hMOXbLzIhlaS_edv0&t=2023-12-11T01%3A01%3A39.654Z"})

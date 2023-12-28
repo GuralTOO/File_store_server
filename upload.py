@@ -201,4 +201,4 @@ def print_weaviate(properties=[""], path="",k=5):
 
 #print(print_weaviate(properties=["text"], path=testing_path))
 # print(print_weaviate(properties=["text"], path="test"))
-print(analyze_research("test"))
+# print(analyze_research("test"))
