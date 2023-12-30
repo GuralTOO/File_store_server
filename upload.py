@@ -16,7 +16,7 @@ def get_context_for_authors(properties=[""], k=3, path=""):
     properties.append("page_number")
     pathFilter = {"path": "path", "operator": "Like", "valueText": path}
     page_filter = {"path": "page_number",
-                   "operator": "Equal", "valueText": "0"}
+                   "operator": "Equal", "valueText": "1"}
     client = WeaviateClient.get_client()
 
     # text_query = "A list of authors of this research paper"
