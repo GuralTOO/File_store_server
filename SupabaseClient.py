@@ -7,7 +7,6 @@ url: str = os.environ["SUPABASE_URL"]
 key: str = os.environ["SUPABASE_SERVICE_KEY"]
 supabase: Client = create_client(url, key)
 
-print(supabase)
 
 def update_metadata_in_database(path, metadata):
     try:
@@ -71,4 +70,4 @@ def call_edge_function(functionName, params):
 #                     })
 
 
-call_edge_function("load_pdf", {"imageUrl": "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/temp_files/1706.03762_page-0001.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ0ZW1wX2ZpbGVzLzE3MDYuMDM3NjJfcGFnZS0wMDAxLmpwZyIsImlhdCI6MTcwMzYxMDQzMiwiZXhwIjoxNzA0MjE1MjMyfQ.UGEx0AakQKrqaDSvZdVFBkldLuM365_s7BlSa72PuUQ&t=2023-12-26T17%3A07%3A13.935Z"})
+# call_edge_function("load_pdf", {"imageUrl": "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/temp_files/1706.03762_page-0001.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ0ZW1wX2ZpbGVzLzE3MDYuMDM3NjJfcGFnZS0wMDAxLmpwZyIsImlhdCI6MTcwMzYxMDQzMiwiZXhwIjoxNzA0MjE1MjMyfQ.UGEx0AakQKrqaDSvZdVFBkldLuM365_s7BlSa72PuUQ&t=2023-12-26T17%3A07%3A13.935Z"})
