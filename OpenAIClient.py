@@ -44,11 +44,11 @@ def get_answer(query: str, path: str):
 
 def get_answer_stream(question: str, path: str):
     # print("$$$")
-    # TODO Not immediate. But see how we can get optimum value of k. Read about how Weaviate stores data and how its search works.
+    # TODO #3 Not immediate. But see how we can get optimum value of k. Read about how Weaviate stores data and how its search works.
     contexts = WeaviateClient.search_items(class_name=class_name, properties=[
         "text"], text_query=question, k=5, path=path)
     # print("CONTEXT ::: ", context)
-    # TODO Concatenate contexts to get a single context to be given to the openAI query. It should include file's title and page number for each chunk.
+    # TODO #4 Concatenate contexts to get a single context to be given to the openAI query. It should include file's title and page number for each chunk.
     for filePath in contexts.keys():
         print("NEW ANSWER!")
         fileTitle = getFileTitleFromPath(filePath)

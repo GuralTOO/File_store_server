@@ -165,7 +165,7 @@ def delete_items(className, path):
 
 
 # search for items in a class using nearest neighbor search
-# TODO Modify this function so that the return type remains the former wherever this function is used outside OpenAIClient.py fiile. Use the "all_props" bool for it.
+# TODO #5 Modify this function so that the return type remains the former wherever this function is used outside OpenAIClient.py fiile. Use the "all_props" bool for it.
 def search_items(class_name, properties=[""], text_query="", k=10, path="", all_props = False):
     properties.append("path")
     properties.append("page_number")
