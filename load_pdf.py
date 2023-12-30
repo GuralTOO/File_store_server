@@ -57,7 +57,6 @@ async def process_page(executor, client, image):
 
 
 async def load_pdf_with_textract(class_name, properties=None):
-    print(properties)
     start_time = time.time()
     url = properties["url"]    
 
@@ -108,6 +107,7 @@ async def load_pdf_with_textract(class_name, properties=None):
 
     end_time = time.time()
     print("time elapsed: " + str(end_time - start_time))
+    print("uploaded file to class: " + class_name + " with path: " + properties["path"] + " and url: " + properties["url"])
 
     return "Success"
 # import pypdf
