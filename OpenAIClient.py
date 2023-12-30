@@ -21,10 +21,11 @@ def get_answer(query: str, path: str):
     for filePath in contexts.keys():
         fileTitle = getFileTitleFromPath(filePath)
         print("File title :", fileTitle)
-        print("File context :", contexts[filePath])
+        print("Page Number :", contexts[filePath][1])
+        print("File context :", contexts[filePath][0])
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(contexts[filePath])},
+            messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(contexts[filePath][0])},
                     {"role": "user", "content": "This is my question: " + query}],
             max_tokens=2500,
             temperature=0.3,
@@ -43,13 +44,17 @@ def get_answer(query: str, path: str):
 
 def get_answer_stream(question: str, path: str):
     # print("$$$")
+    # TODO Not immediate. But see how we can get optimum value of k. Read about how Weaviate stores data and how its search works.
     contexts = WeaviateClient.search_items(class_name=class_name, properties=[
         "text"], text_query=question, k=5, path=path)
     # print("CONTEXT ::: ", context)
+    # TODO Concatenate contexts to get a single context to be given to the openAI query. It should include file's title and page number for each chunk.
     for filePath in contexts.keys():
+        print("NEW ANSWER!")
         fileTitle = getFileTitleFromPath(filePath)
         print("File title :", fileTitle)
-        print("File context :", contexts[filePath])
+        print("Page Number :", contexts[filePath][1])
+        print("File context :", contexts[filePath][0])
         response = openai.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(contexts[filePath])},
@@ -69,7 +74,7 @@ def get_answer_stream(question: str, path: str):
 # if __name__ == '__main__':
 #     get_answer_stream("Give me the list of authors?", "test")
             
-# result = get_answer_stream(question="Extract the primary authors of all the papers as shown in the first page of each paper. Do not make any assumptions.", path="test")
-# for part in result:
-#     print(part, end="")
+result = get_answer_stream(question="What is the advantage of YOLO over other object detectors? Do not make any assumptions.", path="84077a0c-0b0f-43f5-96a5-5c517d1c6d13/Folder X")
+for part in result:
+    print(part, end="")
 # print(get_answer(query="Extract the primary authors of all the papers as shown in the first page of each paper. Do not make any assumptions.", path="test"))

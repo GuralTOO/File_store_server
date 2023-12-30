@@ -165,8 +165,10 @@ def delete_items(className, path):
 
 
 # search for items in a class using nearest neighbor search
-def search_items(class_name, properties=[""], text_query="", k=10, path=""):
+# TODO Modify this function so that the return type remains the former wherever this function is used outside OpenAIClient.py fiile. Use the "all_props" bool for it.
+def search_items(class_name, properties=[""], text_query="", k=10, path="", all_props = False):
     properties.append("path")
+    properties.append("page_number")
     pathFilter = {"path": "path", "operator": "Like", "valueText": path+"*"}
     results = (client.query.get(class_name=class_name, properties=properties)
                .with_where(pathFilter)
@@ -178,7 +180,10 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
     # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
     search_result = {}
     for i in range(len(results["data"]["Get"][class_name])):
-        search_result[results["data"]["Get"][class_name][i][properties[1]]] = results["data"]["Get"][class_name][i][properties[0]] + "."
+        if search_result.get(results["data"]["Get"][class_name][i][properties[1]]) is None:
+            search_result[results["data"]["Get"][class_name][i][properties[1]]] = [[results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]]]
+        else:
+            search_result[results["data"]["Get"][class_name][i][properties[1]]].append([results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]])
     return search_result
 
 
