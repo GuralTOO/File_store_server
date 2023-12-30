@@ -29,7 +29,7 @@ def handleSearchStream(data):
 
 # expects a 'path' 'url' and 'type' in the request body
 @app.route('/upload', methods=['POST'])
-def upload():
+async def upload():
     print("got request: " + str(request.json) + "\n")
     document_type = request.json.get('type')
     path = request.json.get('path')
@@ -44,7 +44,7 @@ def upload():
 
     # if the contentType is "research" then we want to extract the following information from the file:
     # authors, key results, and methods
-    result = upload_file(document_type=document_type,
+    result = await upload_file(document_type=document_type,
                          path=path, url=url, contentType=contentType)
 
     response = {
