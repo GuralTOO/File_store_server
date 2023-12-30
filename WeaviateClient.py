@@ -1,16 +1,6 @@
 import weaviate
 import dotenv
 import os
-import pypdf
-from pdf2image import convert_from_path
-import pytesseract
-import json
-import io
-import requests
-import datetime
-from utils import utils
-import tempfile
-import time
 
 dotenv.load_dotenv()
 client = weaviate.Client(
@@ -27,9 +17,6 @@ def get_client():
 
 
 classes = client.schema.get().get("classes")
-# print(classes)
-
-# region class utilities
 
 
 def get_class_names():
@@ -54,94 +41,27 @@ def add_class(class_name, description="", variables=[]):
         print("Class already exists")
 
 
+
+
 def delete_class(class_name):
     try:
         client.schema.delete_class(class_name=class_name)
     except:
         print("Class does not exist")
 
-# endregion
-
 
 def add_item(class_name, item):
     uuid = client.data_object.create(class_name=class_name, data_object=item)
-    print("adding item...", item, uuid)
+    # print("adding item...", item, uuid)
 
-
-
-
-import concurrent.futures
-
-def load_pdf(class_name, properties=None):
-    print(properties)
-    start_time = time.time() 
-    try:
-        url = properties["url"]
-        print("loading pdf: " + url + "...")
-        # load file from a given url
-        response = requests.get(url)
-        print(response)
-        response.raise_for_status()
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(response.content)
-
-        # enable batching
-        client.batch.configure(batch_size=100)
-
-        with open(tmp_file.name, "rb") as pdf_file:
-            pdf_reader = pypdf.PdfReader(pdf_file)
-            print("file loaded")
-            num_pages = len(pdf_reader.pages)
-            pages_text = []
-            pageCounter = 0
-            print("file has " + str(num_pages) + " pages")
-
-            def process_page(page):
-                print("reading page: " + str(page + 1) + "...")
-                local_path = os.path.abspath(tmp_file.name)
-                images = convert_from_path(
-                    local_path, first_page=page + 1, last_page=page + 1)
-                # if there are images in the page, use OCR to extract text
-                if images:
-                    page_image = images[0]
-                    page_text = pytesseract.image_to_string(page_image)
-                    pages_text.append(page_text)
-                # if there are no images in the page, use PyPDF2 to extract text
-                else:
-                    page_obj = pdf_reader.getPage(page)
-                    page_text = page_obj.extractText()
-                    pages_text.append(page_text)
-
-                print("page " + str(page + 1) + ": " + page_text)
-
-                # split text into into chunks of 1000 characters when the word ends
-                text_chunks = utils.get_chunks(page_text)
-
-                for chunk in text_chunks:
-                    modified_properties = properties.copy()
-                    modified_properties["page_number"] = str(page)
-                    modified_properties["text"] = chunk
-
-                    add_item(class_name=class_name, item=modified_properties)
-
-                    # add to batches
-                    # client.batch.add_data_object(
-                    #     data_object=modified_properties, class_name=class_name)
-                    
-
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                executor.map(process_page, range(num_pages))
-
-            pageCounter += num_pages
-            
-        # end timer
-        end_time = time.time()
-        print("time elapsed: " + str(end_time - start_time))
-        return "Success"
-    except Exception as e:
-        print("Error loading pdf:", e)
-        return "Failure"
-
+def add_batch_items(class_name, batch_items):
+    client.batch.configure(batch_size=100)  # Configure batch
+    with client.batch as batch:
+        for item in batch_items:
+            batch.add_data_object(
+                data_object=item,
+                class_name=class_name,
+            )
 
 
 # Delete document takes in a classname and a path and deletes all items with that path
@@ -201,6 +121,3 @@ def find_specific_item(className, path):
 
 # find_specific_item(className="File_store", path = "test")
 
-# load_pdf(class_name="file_store", properties={
-#             "type": "research", "path": "test", "url": "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/044dd9f2-929d-4bc6-b5b9-a18869c4d8ae/Self-Supervised%20Poisson-Gaussian%20Denoising.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMDQ0ZGQ5ZjItOTI5ZC00YmM2LWI1YjktYTE4ODY5YzRkOGFlL1NlbGYtU3VwZXJ2aXNlZCBQb2lzc29uLUdhdXNzaWFuIERlbm9pc2luZy5wZGYiLCJpYXQiOjE3MDIyNTY0OTgsImV4cCI6MTcwMjg2MTI5OH0.kdneimFyliV8aZQl80Z6XGTyS0hMOXbLzIhlaS_edv0&t=2023-12-11T01%3A01%3A39.654Z"})
-# delete_items(className="File_store", path = "test")

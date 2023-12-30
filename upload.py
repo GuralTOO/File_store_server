@@ -3,6 +3,9 @@ import openai
 import WeaviateClient
 import os
 import SupabaseClient
+from load_pdf import load_pdf_with_textract as load_pdf
+
+
 class_name = "File_store"
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -13,10 +16,12 @@ def get_context_for_authors(properties=[""], k=3, path=""):
     properties.append("page_number")
     pathFilter = {"path": "path", "operator": "Like", "valueText": path}
     page_filter = {"path": "page_number",
-                   "operator": "Equal", "valueText": "0"}
+                   "operator": "Equal", "valueText": "1"}
     client = WeaviateClient.get_client()
+
     # text_query = "A list of authors of this research paper"
     # text_query = "Return the names of the authors of the paper"
+
     text_query = "Can you return the names of the authors of the paper?"
     results = (
         client.query
@@ -63,13 +68,16 @@ def get_context_for_methods(properties=[""], k=3, path=""):
 
 def get_context_for_key_results(properties=[""], k=3, path=""):
     print("path in results: ", path)
+    
     properties.append("path")
     pathFilter = {"path": "path", "operator": "Equal", "valueText": path}
     client = WeaviateClient.get_client()
+    
     # text_query = "The section of a research paper that describes the key results and outcomes of the research"
     # text_query = "Return the results, discussion, outcomes, evaluation of the paper"
     # text_query = "Can you return the results, discussion, and outcomes of the paper?"
     text_query = "Can you provide the main results, discussion, outcomes, and findings described in the paper?"
+    
     results = (
         client.query
         .get(class_name=class_name, properties=properties)
@@ -137,9 +145,9 @@ def analyze_research(path=""):
     return {"title" : title, "authors": authors, "methods": methods, "key_results": key_results}
 
 
-def upload_file(document_type, path, url, contentType="research"):
+async def upload_file(document_type, path, url, contentType="research"):
     # Load the file to Weaviate
-    result = WeaviateClient.load_pdf(class_name=class_name, properties={
+    result = await load_pdf(class_name=class_name, properties={
                                      "type": document_type, "path": path, "url": url})
 
 
@@ -202,3 +210,4 @@ def print_weaviate(properties=[""], path="",k=5):
 #print(print_weaviate(properties=["text"], path=testing_path))
 # print(print_weaviate(properties=["text"], path="test"))
 # print(analyze_research("test"))
+# print(print_weaviate(properties=["text"], path=testing_path))
