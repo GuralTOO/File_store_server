@@ -1,16 +1,6 @@
 import weaviate
 import dotenv
 import os
-import pypdf
-from pdf2image import convert_from_path
-import pytesseract
-import json
-import io
-import requests
-import datetime
-from utils import utils
-import tempfile
-import time
 
 dotenv.load_dotenv()
 client = weaviate.Client(
@@ -51,6 +41,8 @@ def add_class(class_name, description="", variables=[]):
         print("Class already exists")
 
 
+
+
 def delete_class(class_name):
     try:
         client.schema.delete_class(class_name=class_name)
@@ -60,8 +52,16 @@ def delete_class(class_name):
 
 def add_item(class_name, item):
     uuid = client.data_object.create(class_name=class_name, data_object=item)
-    print("adding item...", item, uuid)
+    # print("adding item...", item, uuid)
 
+def add_batch_items(class_name, batch_items):
+    client.batch.configure(batch_size=100)  # Configure batch
+    with client.batch as batch:
+        for item in batch_items:
+            batch.add_data_object(
+                data_object=item,
+                class_name=class_name,
+            )
 
 
 # Delete document takes in a classname and a path and deletes all items with that path

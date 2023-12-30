@@ -5,11 +5,37 @@ from pdf2image import convert_from_path
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import io
-
+from WeaviateClient import add_item, add_batch_items
 import tracemalloc
 tracemalloc.start()
 import functools
 
+
+def get_chunks_with_overlap(text, chunk_size=1000, overlap_size=150):
+    """Splits the text into chunks of specified size with overlap."""
+    chunks = []
+    index = 0
+
+    while index < len(text):
+        # If we are not at the start, move back to create overlap
+        if index > 0 and (index - overlap_size) > 0:
+            index -= overlap_size
+
+        # Find the end of the chunk
+        end = min(index + chunk_size, len(text))
+
+        # Ensure the chunk ends on a space (if not the end of the text)
+        if end < len(text):
+            while end > index and text[end] != ' ':
+                end -= 1
+
+        # Add the chunk
+        chunks.append(text[index:end].strip())
+
+        # Move the index forward
+        index = end
+
+    return chunks
 
 # Function to process a single page
 async def process_page(executor, client, image):
@@ -24,13 +50,11 @@ async def process_page(executor, client, image):
     # Call Textract using run_in_executor
     response = await loop.run_in_executor(executor, func)
     text = '\n'.join([block['Text'] for block in response['Blocks'] if block['BlockType'] == 'LINE'])
-    # for block in response['Blocks']:
-    #     if block['BlockType'] != 'WORD':
-    #         print(block['BlockType'])
-    #     if block['BlockType'] == 'LINE':
-    #         print(block['Text'])
+
         
     return text
+
+
 
 async def load_pdf_with_textract(class_name, properties=None):
     print(properties)
@@ -43,9 +67,6 @@ async def load_pdf_with_textract(class_name, properties=None):
 
     # Convert PDF to images
     images = convert_from_path('document.pdf')
-    
-    time_after_pdf_to_image = time.time()
-    print("time elapsed after pdf to image: " + str(time_after_pdf_to_image - start_time))
 
     # Setup AWS Textract client
     session = boto3.Session()
@@ -55,15 +76,40 @@ async def load_pdf_with_textract(class_name, properties=None):
     with ThreadPoolExecutor(max_workers=len(images)) as executor:
         tasks = [process_page(executor, client, image) for image in images]
         results = await asyncio.gather(*tasks)
+
+    # time to get the text from the images
+    images_time = time.time()
+    print("time to get the text from the images: " + str(images_time - start_time))
+
+    combined_pages = []
+    overlap_size = 150
+    for i in range(len(results)):
+        combined_text = results[i]
+        if i < len(results) - 1:  # if not the last page, append the beginning of the next page
+            combined_text += "\n" + results[i + 1][:overlap_size]  # overlap_size from get_chunks_with_overlap
+        combined_pages.append((i + 1, combined_text))  # Store page number with combined text
+
+    batch_items = []  # Initialize a list to collect batch items
+    for page_number, text in combined_pages:
+        text_chunks = get_chunks_with_overlap(text)
+        for chunk in text_chunks:
+            modified_properties = properties.copy()
+            modified_properties["page_number"] = str(page_number)
+            modified_properties["text"] = chunk
+            batch_items.append(modified_properties)  # Add item to the batch list
+
+            # When batch size is reached, send the batch
+            if len(batch_items) >= 100:
+                add_batch_items(class_name, batch_items)
+                batch_items = []  # Reset the batch list after sending
     
-    # Combine text from all pages
-    full_text = "\n".join(results)
-    
+    if batch_items:
+        add_batch_items(class_name, batch_items)  # Send the remaining batch
+
     end_time = time.time()
     print("time elapsed: " + str(end_time - start_time))
-    
-    return full_text
 
+    return "Success"
 # import pypdf
 # from pdf2image import convert_from_path
 # import pytesseract
@@ -147,15 +193,17 @@ async def load_pdf_with_textract(class_name, properties=None):
 #     except Exception as e:
 #         print("Error loading pdf:", e)
 #         return "Failure"
-async def main():
-    url_8page = "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/23c88506-31e5-43c7-911c-d6df61fbbf7b/curve-stablecoin.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMjNjODg1MDYtMzFlNS00M2M3LTkxMWMtZDZkZjYxZmJiZjdiL2N1cnZlLXN0YWJsZWNvaW4ucGRmIiwiaWF0IjoxNzAzOTA4MzA3LCJleHAiOjE3MDQ1MTMxMDd9.PVXyAmoZqWlrSt2-v5ma6P9oZrFlm-7vqTSytAAkcNo&t=2023-12-30T03%3A51%3A47.332Z"
-    url_29page = "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/06ca3fba-93e4-493d-9c22-5c5ddc15d352/G3-2023-404312_Merged_PDF.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMDZjYTNmYmEtOTNlNC00OTNkLTljMjItNWM1ZGRjMTVkMzUyL0czLTIwMjMtNDA0MzEyX01lcmdlZF9QREYucGRmIiwiaWF0IjoxNzAzOTA4Mjc3LCJleHAiOjE3MDQ1MTMwNzd9.3CJFZeo6s7XchyaWmyD-6rkxU-JqnQPulZfgLOc5KB8&t=2023-12-30T03%3A51%3A17.288Z"
-    result = await load_pdf_with_textract("test", {"url": url_29page})
-    # print(result)
+
+
+# async def main():
+#     url_8page = "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/23c88506-31e5-43c7-911c-d6df61fbbf7b/curve-stablecoin.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMjNjODg1MDYtMzFlNS00M2M3LTkxMWMtZDZkZjYxZmJiZjdiL2N1cnZlLXN0YWJsZWNvaW4ucGRmIiwiaWF0IjoxNzAzOTA4MzA3LCJleHAiOjE3MDQ1MTMxMDd9.PVXyAmoZqWlrSt2-v5ma6P9oZrFlm-7vqTSytAAkcNo&t=2023-12-30T03%3A51%3A47.332Z"
+#     url_29page = "https://emoimoycgytvcixzgjiy.supabase.co/storage/v1/object/sign/documents/06ca3fba-93e4-493d-9c22-5c5ddc15d352/G3-2023-404312_Merged_PDF.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkb2N1bWVudHMvMDZjYTNmYmEtOTNlNC00OTNkLTljMjItNWM1ZGRjMTVkMzUyL0czLTIwMjMtNDA0MzEyX01lcmdlZF9QREYucGRmIiwiaWF0IjoxNzAzOTA4Mjc3LCJleHAiOjE3MDQ1MTMwNzd9.3CJFZeo6s7XchyaWmyD-6rkxU-JqnQPulZfgLOc5KB8&t=2023-12-30T03%3A51%3A17.288Z"
+#     result = await load_pdf_with_textract("test", {"url": url_29page})
+#     print(result)
 
 
 
-# Running the main function
-if __name__ == "__main__":
-    asyncio.run(main())
+# # Running the main function
+# if __name__ == "__main__":
+#     asyncio.run(main())
 

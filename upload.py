@@ -3,7 +3,7 @@ import openai
 import WeaviateClient
 import os
 import SupabaseClient
-from load_pdf import load_pdf
+from load_pdf import load_pdf_with_textract as load_pdf
 
 
 class_name = "File_store"
