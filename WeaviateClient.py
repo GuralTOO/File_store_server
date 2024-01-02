@@ -96,15 +96,24 @@ def search_items(class_name, properties=[""], text_query="", k=10, path="", all_
                .with_limit(k)
                .do()
                )
-    # print("search results: ", results)
-    # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
-    search_result = {}
-    for i in range(len(results["data"]["Get"][class_name])):
-        if search_result.get(results["data"]["Get"][class_name][i][properties[1]]) is None:
-            search_result[results["data"]["Get"][class_name][i][properties[1]]] = [[results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]]]
-        else:
-            search_result[results["data"]["Get"][class_name][i][properties[1]]].append([results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]])
-    return search_result
+    if all_props:
+        # print("search results: ", results)
+        # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
+        search_result = {}
+        for i in range(len(results["data"]["Get"][class_name])):
+            if search_result.get(results["data"]["Get"][class_name][i][properties[1]]) is None:
+                search_result[results["data"]["Get"][class_name][i][properties[1]]] = [[results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]]]
+            else:
+                search_result[results["data"]["Get"][class_name][i][properties[1]]].append([results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]])
+        return search_result
+    else:
+        print("search results: ", results)
+        # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
+        search_result = ""
+        for i in range(len(results["data"]["Get"][class_name])):
+            search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
+        return search_result
+
 
 
 
