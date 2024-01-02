@@ -6,7 +6,7 @@ class_name = "File_store"
 
 def get_answer(query: str, path: str):
     contexts = WeaviateClient.search_items(class_name=class_name, properties=[
-        "text"], text_query=query, k=5, path=path)
+        "text"], text_query=query, k=5, path=path, all_props=True)
     # response = openai.chat.completions.create(
     #     model="gpt-3.5-turbo",
     #     messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(context)},
@@ -53,7 +53,7 @@ def get_answer_stream(question: str, path: str):
     # TODO #3 Not immediate. But see how we can get optimum value of k. Read about how Weaviate stores data and how its search works.
     # TODO #6 Is there a better way to search contexts?
     contexts = WeaviateClient.search_items(class_name=class_name, properties=[
-        "text"], text_query=question, k=5, path=path)
+        "text"], text_query=question, k=5, path=path, all_props=True)
     # print("CONTEXT ::: ", context)
     # TODO #4 Concatenate contexts to get a single context to be given to the openAI query. It should include file's title and page number for each chunk.
     mergedContext = ""
