@@ -42,7 +42,6 @@ def add_class(class_name, description="", variables=[]):
 
 
 
-
 def delete_class(class_name):
     try:
         client.schema.delete_class(class_name=class_name)
@@ -76,7 +75,6 @@ def delete_items(className, path):
             output="verbose",
             dry_run=False
         )
-        print("result: ", result)
         return "Success"
     except Exception as e:
         print("Error deleting items:", e)
@@ -113,5 +111,78 @@ def find_specific_item(className, path):
         print(results["data"]["Get"][className][i]["text"])
     print(len(results["data"]["Get"][className]))    
     return results
+
+
+# TODO: Delete this shiiii
+
+# def get_filter_search(properties=["path"], path=""):
+#     response = (
+#     client.query
+#     .get(class_name="File_store", properties=properties)
+#     .with_where({
+#         "path": ["path"],
+#         "operator": "Equal",
+#         "valueText": path
+#     }).do()
+#     )
+#     return response["data"]["Get"]["File_store"]
+
+# # 
+# def get_bm25_search(properties=["path"], path=""):
+#     response = (
+#     client.query
+#     .get(class_name="File_store", properties=properties)
+#     .with_bm25(
+#       query= path
+#     )
+#     .do())
+
+#     return response["data"]["Get"]["File_store"]
+
+# # search_result = get_bm25_search(["path"], path="c75767dd-172c-463c-aafc-1e2dfddc1b32/t1/2/2/short_1706.03762.pdf")
+
+# # filter_search_result = get_filter_search(["path"], path="c75767dd-172c-463c-aafc-1e2dfddc1b32/t1/2/2/short_1706.03762.pdf")
+
+# # print(filter_search_result, len(filter_search_result))
+
+
+
+# path1 = "c75767dd-172c-463c-aafc-1e2dfddc1b32/t2/t1/short_1706.03762.pdf"
+# path2 = "c75767dd-172c-463c-aafc-1e2dfddc1b32/t1/2/short_1706.03762.pdf"
+# # delete_items("File_store", path2)
+
+# def add_cool_class():
+#     class_name = "dolar_sign"
+#     description = "A class to store files"
+#     variables = ["text", "page_number", "path"]
+    
+#     try:
+#         properties = []
+#         for var in variables:
+#             if var == "path":
+#                 properties.append(
+#                     {"dataType": ["string"],
+#                      "name": var, 
+#                      "description": var, 
+#                      "tokenization": "field"
+#                     })
+#             else:
+#                 properties.append(
+#                     {"dataType": ["text"], "name": var, "description": var})
+#         class_obj = {
+#             "class": class_name,
+#             "description": description,
+#             "properties": properties,
+#             "vectorizer": "text2vec-openai"
+#         }
+#         client.schema.create_class(class_obj)
+#     except Exception as e:
+#         print("Class already exists", e)
+        
+# add_cool_class()
+# delete_class("Dolar_sign")
+# print(get_class_names())
+
+
 
 
