@@ -102,11 +102,6 @@ def analyze_research(path=""):
     contexts = [get_context_for_authors(properties=["text"], k=3, path=path), get_context_for_methods(
         properties=["text"], k=3, path=path), get_context_for_key_results(properties=["text"], k=3, path=path)]
     
-    
-    # print("CONTEXT (Authors): ", contexts[0])
-    # print("CONTEXT (Methods): ", contexts[1])
-    # print("CONTEXT (Results): ", contexts[2])
-
     for i in range(len(questions)):
         question = questions[i]
         context = contexts[i]
@@ -147,6 +142,3 @@ async def upload_file(document_type, path, url, contentType="research"):
     print("updated metadata in database for path: ", path)
         
     return
-
-
-# print(print_weaviate(properties=["text"], path=testing_path))
