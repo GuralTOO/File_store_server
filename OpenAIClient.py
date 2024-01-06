@@ -8,12 +8,13 @@ def get_answer_stream(question: str, path: str):
         "text"], text_query=question, k=5, path=path)
     response = openai.chat.completions.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + str(context)},
-                  {"role": "user", "content": "This is my question: " + question}],
+        messages=[{"role": "system", "content": "You are a helpful assistant that answers questions based on excerpts from the following documents:" + mergedContext},
+                {"role": "user", "content": "This is my question: " + question}],
         max_tokens=2500,
         temperature=0.3,
         stream=True,
     )
+
     for part in response:
         print(part)
         # check if part['choices'][0]['delta'] has 'content' key

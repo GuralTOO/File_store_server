@@ -142,9 +142,11 @@ End of preliminary testing for delete
 '''
 
 # search for items in a class using nearest neighbor search
+# TODO #5 Modify this function so that the return type remains the former wherever this function is used outside OpenAIClient.py fiile. Use the "all_props" bool for it.
 # returns the first property of the first k results concatenated 
-def search_items(class_name, properties=[""], text_query="", k=10, path=""):
+def search_items(class_name, properties=[""], text_query="", k=10, path="", all_props = False):
     properties.append("path")
+    properties.append("page_number")
     pathFilter = {"path": "path", "operator": "Like", "valueString": path+"*"}
     results = (client.query.get(class_name=class_name, properties=properties)
                .with_where(pathFilter)
@@ -152,12 +154,23 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
                .with_limit(k)
                .do()
                )
-    print("search results: ", results)
-    # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]] 
-    search_result = ""
-    for i in range(len(results["data"]["Get"][class_name])):
-        search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
-    return search_result
+    if all_props:
+        # print("search results: ", results)
+        # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
+        search_result = {}
+        for i in range(len(results["data"]["Get"][class_name])):
+            if search_result.get(results["data"]["Get"][class_name][i][properties[1]]) is None:
+                search_result[results["data"]["Get"][class_name][i][properties[1]]] = [[results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]]]
+            else:
+                search_result[results["data"]["Get"][class_name][i][properties[1]]].append([results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]])
+        return search_result
+    else:
+        print("search results: ", results)
+        # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]] 
+        search_result = ""
+        for i in range(len(results["data"]["Get"][class_name])):
+            search_result += results["data"]["Get"][class_name][i][properties[0]] + ".\n"
+        return search_result
 
 
 # Filters search results by path 
