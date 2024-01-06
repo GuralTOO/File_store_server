@@ -55,18 +55,38 @@ async def process_page(executor, client, image):
         
     return text
 
-def get_title(text):
-    response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                {"role": "user", "content": f"Extract the title of the paper from the given context. \
-                                Note that it may be in multiple lines. Do not make any assumptions.\nContext:\"\"\"{text}\"\"\""}],
-                max_tokens=2000,
-                temperature=0.0)
-              
-    extracted_title = response.choices[0].message.content
+def get_title(text, model="gpt-3.5-turbo"):
 
-    return extracted_title
+    try:
+        response = openai.chat.completions.create(
+                    model=model,
+                    messages=[
+                    {"role": "user", "content": f"Extract the title of the paper from the given context. \
+                                    Note that it may be in multiple lines. Do not make any assumptions.\nContext:\"\"\"{text}\"\"\""}],
+                    max_tokens=1000,
+                    temperature=0.0)
+        extracted_title = response.choices[0].message.content
+        return extracted_title
+    
+    except:
+        try:
+            # assuming exception is due to too many tokens
+            # chunk the text and choose first 3000 tokens
+            text = get_chunks_with_overlap(text=text, chunk_size=3000,overlap_size=0)[0]
+            response = openai.chat.completions.create(
+                        model=model,
+                        messages=[
+                        {"role": "user", "content": f"Extract the title of the paper from the given context. \
+                                        Note that it may be in multiple lines. Do not make any assumptions.\nContext:\"\"\"{text}\"\"\""}],
+                        max_tokens=1000,
+                        temperature=0.0)
+                    
+            extracted_title = response.choices[0].message.content
+            return extracted_title
+        
+        except Exception as e:
+            print("Error finding the title: ", e)
+            return "" # currently not returning any title on exception
 
 async def load_pdf_with_textract(class_name, properties=None):
     start_time = time.time()
@@ -106,8 +126,6 @@ async def load_pdf_with_textract(class_name, properties=None):
         # extract title from the first page
         if page_number == 1:
             extracted_title =  get_title(text)
-            # print("TITLE: ", extracted_title)
-            # print(text)
 
         text_chunks = get_chunks_with_overlap(text)
         for chunk in text_chunks:
