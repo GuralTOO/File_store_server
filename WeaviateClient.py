@@ -147,6 +147,7 @@ End of preliminary testing for delete
 def search_items(class_name, properties=[""], text_query="", k=10, path="", all_props = False):
     properties.append("path")
     properties.append("page_number")
+    
     pathFilter = {"path": "path", "operator": "Like", "valueString": path+"*"}
     results = (client.query.get(class_name=class_name, properties=properties)
                .with_where(pathFilter)
@@ -155,10 +156,10 @@ def search_items(class_name, properties=[""], text_query="", k=10, path="", all_
                .do()
                )
     if all_props:
-        # print("search results: ", results)
-        # concatenate all text from the results in ["data"]["Get"][class_name][i][properties[0]]
-        search_result = {}
+       
+        search_result = []
         for i in range(len(results["data"]["Get"][class_name])):
+            
             if search_result.get(results["data"]["Get"][class_name][i][properties[1]]) is None:
                 search_result[results["data"]["Get"][class_name][i][properties[1]]] = [[results["data"]["Get"][class_name][i][properties[0]] + ".", results["data"]["Get"][class_name][i][properties[2]]]]
             else:
