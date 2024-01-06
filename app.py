@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)  # Add CORS so that the frontend can access this server
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
-class_name = "File_store"
+class_name = "File_store_ver2"
 
 
 @socketio.on('searchStream')
@@ -23,7 +23,7 @@ def handleSearchStream(data):
     print("query: " + query + "\n")
     result = OpenAIClient.get_answer_stream(question=query, path=path)
     for part in result:
-        print(part)
+        # print(part)
         send(part)
 
 

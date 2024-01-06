@@ -161,7 +161,7 @@ def search_items(class_name, properties=[""], text_query="", k=10, path=""):
 
 
 # Filters search results by path 
-def get_filter_search(properties=["path"], path="", class_name = "Another_class"):
+def get_filter_search(properties=["path"], path="", class_name = "File_store_ver2"):
     response = (
     client.query
     .get(class_name=class_name, properties=properties)
@@ -173,10 +173,3 @@ def get_filter_search(properties=["path"], path="", class_name = "Another_class"
     )
     return response["data"]["Get"][class_name]
 
-# print(get_filter_search(["path", "page_number"], path="abcd/test_a.pdf", class_name="Another_class"))
-
-
-
-#TODO: use the add_class function to create a class with the following properties: type, path, url, text, page_number, title
-#TODO: rename all the class_name variables to the name of this class. Probably "File_store_2.0"
-#TODO: Maybe run the load_pdf function on select files from the users filesystem
