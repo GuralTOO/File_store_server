@@ -38,10 +38,6 @@ async def upload():
     # if the request has a "contentType", then get it, if not, set it to ""
     contentType = request.json.get('contentType', "")
 
-    # make the weaviate call
-    # result = WeaviateClient.load_pdf(class_name=class_name, properties={
-    #     "type": document_type, "path": path, "url": url})
-
     # if the contentType is "research" then we want to extract the following information from the file:
     # authors, key results, and methods
     result = await upload_file(document_type=document_type,
